@@ -8,7 +8,7 @@ const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 async function callGeminiAPI(text) {
     const ai = new GoogleGenAI({
-        apiKey: process.env.GEMINI_API_KEY,
+        apiKey: GEMINI_API_KEY,
       });
       const config = {
         responseMimeType: 'text/plain',
