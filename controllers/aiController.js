@@ -12,9 +12,11 @@ async function callGeminiAPI(text) {
     
     // List of models to try (in order of preference)
     const models = [
-        "gemini-1.5-flash",
-        "gemini-1.5-pro", 
-        "gemini-1.0-pro"
+        "Gemini 2.5 Pro",
+
+        // "gemini-1.5-flash",
+        // "gemini-1.5-pro", 
+        // "gemini-1.0-pro"
     ];
     
     const prompt = `kamu adalah seorang asisten pribadi yang memberi kritik dan saran untuk konten yang diberikan oleh user. Berikut adalah konten yang perlu dikritik: ${text}`;
