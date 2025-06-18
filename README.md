@@ -1,308 +1,226 @@
-# GenAI Backend - CRUD API
+# GenAI Backend - Integrasi Frontend-Backend
 
-Backend API untuk operasi CRUD (Create, Read, Update, Delete) dengan database MySQL.
+Backend server untuk aplikasi GenAI yang terintegrasi dengan frontend React.
 
-## Fitur
+## 🚀 Fitur
 
-- ✅ CRUD operations untuk User
-- ✅ Database MySQL dengan connection pool
-- ✅ CORS support untuk frontend
-- ✅ Error handling yang baik
-- ✅ Validasi input
-- ✅ RESTful API endpoints
+- **AI Chat Integration** - Integrasi dengan Google Gemini AI
+- **Keyword Management** - CRUD operasi untuk keyword prompts
+- **Chat History** - Penyimpanan riwayat chat di database
+- **File Upload** - Upload dan proses file (PDF, DOCX, XLSX)
+- **Database Integration** - MySQL database dengan phpMyAdmin
+- **CORS Support** - Dukungan untuk frontend React
 
-## Struktur Proyek
+## 📋 Prerequisites
+
+- Node.js (v16 atau lebih baru)
+- MySQL Server
+- phpMyAdmin (untuk manajemen database)
+- Google Gemini AI API Key
+
+## 🛠️ Instalasi
+
+1. **Clone repository dan install dependencies:**
+```bash
+npm install
+```
+
+2. **Setup Database:**
+   - Buka phpMyAdmin
+   - Import file `database/schema.sql`
+   - Atau jalankan query SQL secara manual
+
+3. **Konfigurasi Environment:**
+   - Copy `.env.example` ke `.env`
+   - Isi konfigurasi database dan API key
+
+4. **Install dependencies tambahan:**
+```bash
+npm install cors mysql2
+```
+
+## 🔧 Konfigurasi
+
+### Environment Variables (.env)
+```env
+PORT=5000
+GEMINI_API_KEY=your_gemini_api_key_here
+DB_HOST=localhost
+DB_PORT=3306
+DB_USERNAME=root
+DB_PASSWORD=your_password_here
+DB_DATABASE=genai_db
+```
+
+### Database Schema
+- **keywords** - Tabel untuk menyimpan keyword prompts
+- **chats** - Tabel untuk menyimpan riwayat chat
+
+## 🚀 Menjalankan Server
+
+### Development Mode
+```bash
+npm run dev
+```
+
+### Production Mode
+```bash
+npm start
+```
+
+Server akan berjalan di `http://localhost:5000`
+
+## 📡 API Endpoints
+
+### Health Check
+```
+GET /health
+```
+
+### AI Chat
+```
+POST /api/ask/text
+POST /api/ask/file
+```
+
+### Keywords Management
+```
+GET    /api/keywords          # Get all keywords
+GET    /api/keywords/:id      # Get keyword by ID
+POST   /api/keywords          # Create new keyword
+PUT    /api/keywords/:id      # Update keyword
+DELETE /api/keywords/:id      # Delete keyword
+GET    /api/keywords/search   # Search keywords by title
+```
+
+### Chat History
+```
+GET    /api/chats             # Get all chats
+GET    /api/chats/:id         # Get chat by ID
+POST   /api/chats             # Create new chat
+GET    /api/chats/keyword/:id # Get chats by keyword
+DELETE /api/chats/:id         # Delete chat
+```
+
+## 🔄 Integrasi Frontend
+
+### CORS Configuration
+Backend sudah dikonfigurasi untuk menerima request dari:
+- `http://localhost:5173` (Vite default)
+- `http://localhost:3000` (Create React App)
+- `http://127.0.0.1:5173`
+
+### Contoh Request dari Frontend
+
+#### Chat dengan AI
+```javascript
+// Text chat
+const response = await fetch('http://localhost:5000/api/ask/text', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  body: JSON.stringify({
+    text: 'Hello AI',
+    keyword_id: 1 // optional
+  })
+});
+
+// File upload
+const formData = new FormData();
+formData.append('file', fileInput.files[0]);
+
+const response = await fetch('http://localhost:5000/api/ask/file', {
+  method: 'POST',
+  body: formData
+});
+```
+
+#### Keyword Management
+```javascript
+// Get all keywords
+const keywords = await fetch('http://localhost:5000/api/keywords').then(r => r.json());
+
+// Create keyword
+const newKeyword = await fetch('http://localhost:5000/api/keywords', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    title: 'New Keyword',
+    prompt: 'Prompt text',
+    category: 'general'
+  })
+}).then(r => r.json());
+```
+
+## 📁 Struktur Project
 
 ```
 genai-backend/
-├── app.js                 # Entry point aplikasi
+├── app.js                 # Entry point
 ├── package.json           # Dependencies
-├── .env                   # Environment variables
-├── models/
-│   └── User.js           # Model untuk operasi database
-├── controllers/
-│   ├── aiController.js   # Controller AI (existing)
-│   └── userController.js # Controller CRUD user
-├── routes/
-│   ├── aiRoutes.js       # Routes AI (existing)
-│   └── userRoutes.js     # Routes CRUD user
-├── utils/
-│   ├── db.js            # Database connection
-│   └── fileParser.js    # File parser (existing)
-├── database/
-│   └── schema.sql       # SQL schema untuk database
-└── frontend-example.html # Contoh frontend untuk testing
+├── routes/                # API routes
+│   ├── aiRoutes.js       # AI endpoints
+│   ├── keywordRoutes.js  # Keyword endpoints
+│   └── chatRoutes.js     # Chat endpoints
+├── controllers/           # Business logic
+│   ├── aiController.js   # AI processing
+│   ├── keywordController.js # Keyword CRUD
+│   └── chatController.js # Chat history
+├── models/               # Database models
+│   ├── Keyword.js       # Keyword model
+│   └── Chat.js          # Chat model
+├── utils/               # Utilities
+│   ├── fileParser.js    # File parsing
+│   └── db.js           # Database connection
+├── database/            # Database files
+│   └── schema.sql      # Database schema
+└── uploads/            # File upload directory
 ```
 
-## Instalasi
+## 🔍 Testing API
 
-1. **Clone repository dan install dependencies:**
-   ```bash
-   npm install
-   ```
-
-2. **Setup database:**
-   - Buat database MySQL
-   - Jalankan script SQL di `database/schema.sql`
-   - Atau buat tabel manual:
-   ```sql
-   CREATE TABLE users (
-     id INT AUTO_INCREMENT PRIMARY KEY,
-     name VARCHAR(255) NOT NULL,
-     email VARCHAR(255) NOT NULL UNIQUE,
-     phone VARCHAR(20),
-     address TEXT,
-     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-   );
-   ```
-
-3. **Konfigurasi environment variables:**
-   Buat file `.env` dengan konfigurasi berikut:
-   ```env
-   # Database Configuration
-   DB_HOST=localhost
-   DB_PORT=3306
-   DB_USERNAME=root
-   DB_PASSWORD=your_password
-   DB_DATABASE=your_database_name
-   
-   # Server Configuration
-   PORT=5000
-   
-   # CORS Configuration
-   FRONTEND_URL=http://localhost:3000
-   ```
-
-4. **Jalankan server:**
-   ```bash
-   npm start
-   ```
-
-## API Endpoints
-
-### User CRUD Operations
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/api/users` | Mengambil semua user |
-| GET | `/api/users/:id` | Mengambil user berdasarkan ID |
-| POST | `/api/users` | Membuat user baru |
-| PUT | `/api/users/:id` | Mengupdate user |
-| DELETE | `/api/users/:id` | Menghapus user |
-
-### Request/Response Format
-
-#### Create User (POST /api/users)
-```json
-// Request
-{
-  "name": "John Doe",
-  "email": "john@example.com",
-  "phone": "081234567890",
-  "address": "Jl. Contoh No. 123"
-}
-
-// Response
-{
-  "success": true,
-  "message": "User berhasil ditambahkan",
-  "data": {
-    "id": 1,
-    "name": "John Doe",
-    "email": "john@example.com",
-    "phone": "081234567890",
-    "address": "Jl. Contoh No. 123"
-  }
-}
-```
-
-#### Get All Users (GET /api/users)
-```json
-// Response
-{
-  "success": true,
-  "message": "Data user berhasil diambil",
-  "data": [
-    {
-      "id": 1,
-      "name": "John Doe",
-      "email": "john@example.com",
-      "phone": "081234567890",
-      "address": "Jl. Contoh No. 123",
-      "created_at": "2024-01-01T00:00:00.000Z",
-      "updated_at": "2024-01-01T00:00:00.000Z"
-    }
-  ]
-}
-```
-
-## Testing
-
-### Menggunakan Frontend Example
-
-1. Buka file `frontend-example.html` di browser
-2. Pastikan server backend berjalan di port 5000
-3. Test semua operasi CRUD melalui interface
-
-### Menggunakan Postman/Insomnia
-
-1. Import collection dengan endpoints berikut:
-   - `GET http://localhost:5000/api/users`
-   - `POST http://localhost:5000/api/users`
-   - `GET http://localhost:5000/api/users/:id`
-   - `PUT http://localhost:5000/api/users/:id`
-   - `DELETE http://localhost:5000/api/users/:id`
-
-### Menggunakan cURL
-
+### Health Check
 ```bash
-# Get all users
-curl -X GET http://localhost:5000/api/users
+curl http://localhost:5000/health
+```
 
-# Create user
-curl -X POST http://localhost:5000/api/users \
+### Test AI Chat
+```bash
+curl -X POST http://localhost:5000/api/ask/text \
   -H "Content-Type: application/json" \
-  -d '{"name":"John Doe","email":"john@example.com","phone":"081234567890","address":"Jl. Contoh No. 123"}'
+  -d '{"text": "Hello AI"}'
+```
 
-# Get user by ID
-curl -X GET http://localhost:5000/api/users/1
+### Test Keywords
+```bash
+# Get all keywords
+curl http://localhost:5000/api/keywords
 
-# Update user
-curl -X PUT http://localhost:5000/api/users/1 \
+# Create keyword
+curl -X POST http://localhost:5000/api/keywords \
   -H "Content-Type: application/json" \
-  -d '{"name":"John Updated","email":"john@example.com","phone":"081234567890","address":"Jl. Baru No. 456"}'
-
-# Delete user
-curl -X DELETE http://localhost:5000/api/users/1
+  -d '{"title": "Test", "prompt": "Test prompt", "category": "test"}'
 ```
 
-## Integrasi dengan Frontend
-
-### JavaScript/Fetch API
-```javascript
-const API_BASE_URL = 'http://localhost:5000/api/users';
-
-// Create user
-const createUser = async (userData) => {
-  const response = await fetch(API_BASE_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData)
-  });
-  return response.json();
-};
-
-// Get all users
-const getUsers = async () => {
-  const response = await fetch(API_BASE_URL);
-  return response.json();
-};
-
-// Update user
-const updateUser = async (id, userData) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(userData)
-  });
-  return response.json();
-};
-
-// Delete user
-const deleteUser = async (id) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    method: 'DELETE'
-  });
-  return response.json();
-};
-```
-
-### React Example
-```jsx
-import { useState, useEffect } from 'react';
-
-function UserManagement() {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-
-  const fetchUsers = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch('http://localhost:5000/api/users');
-      const result = await response.json();
-      if (result.success) {
-        setUsers(result.data);
-      }
-    } catch (error) {
-      console.error('Error fetching users:', error);
-    }
-    setLoading(false);
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  return (
-    <div>
-      <h1>User Management</h1>
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <ul>
-          {users.map(user => (
-            <li key={user.id}>{user.name} - {user.email}</li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-```
-
-## Error Handling
-
-API mengembalikan response dengan format yang konsisten:
-
-```json
-{
-  "success": false,
-  "message": "Pesan error",
-  "error": "Detail error (opsional)"
-}
-```
-
-## CORS Configuration
-
-Backend sudah dikonfigurasi untuk menerima request dari frontend dengan CORS. Pastikan URL frontend sesuai dengan konfigurasi di `.env`.
-
-## Troubleshooting
+## 🐛 Troubleshooting
 
 ### Database Connection Error
 - Pastikan MySQL server berjalan
 - Periksa konfigurasi database di `.env`
-- Pastikan database dan tabel sudah dibuat
+- Pastikan database `genai_db` sudah dibuat
 
 ### CORS Error
-- Periksa URL frontend di konfigurasi CORS
-- Pastikan `FRONTEND_URL` di `.env` sesuai dengan URL frontend
+- Periksa origin frontend di konfigurasi CORS
+- Pastikan frontend berjalan di port yang benar
 
-### Port Already in Use
-- Ganti port di `.env` atau hentikan proses yang menggunakan port tersebut
+### File Upload Error
+- Pastikan folder `uploads/` ada dan memiliki permission write
+- Periksa ukuran file (default max 50MB)
 
-## Dependencies
+## 📝 Notes
 
-- `express`: Web framework
-- `mysql2`: MySQL driver
-- `cors`: Cross-origin resource sharing
-- `dotenv`: Environment variables
-- `@google/genai`: Google AI (existing)
-- `multer`: File upload (existing)
-- `pdf-parse`: PDF parsing (existing)
-- `xlsx`: Excel parsing (existing)
-
+- File yang diupload akan dihapus setelah diproses
+- Chat history otomatis tersimpan ke database
+- Keyword bisa dikategorikan untuk organisasi yang lebih baik
+- API responses menggunakan format standar dengan `success` dan `data/error` fields
