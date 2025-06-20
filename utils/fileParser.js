@@ -28,3 +28,16 @@ exports.parseFileContent = async (filePath) => {
   if (ext === '.xlsx' || ext === '.xls') return parseXLSX(filePath);
   throw new Error('Unsupported file type.');
 };
+
+exports.askFile = async (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'File is required.' });
+  try {
+    const filePath = path.join(__dirname, '..', req.file.path);
+    const fileText = await parseFileContent(filePath);
+    const result = await callGeminiAPI(fileText);
+    fs.unlinkSync(filePath); // delete file after processing
+    res.json({ response: result });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

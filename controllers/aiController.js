@@ -8,18 +8,19 @@ const Chat = require('../models/Chat');
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
 async function callGeminiAPI(text) {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+    const genAI = new GoogleGenerativeAI("AIzaSyAba8AFgSwHLh1EtsCsJ9BgH9nxEAPBzIs");
     
     // List of models to try (in order of preference)
     const models = [
-        "Gemini 2.5 Pro",
-
+  
+        "gemini-2.0-flash",
         // "gemini-1.5-flash",
+        // "gemini-2.5-flash-preview-05-20"
         // "gemini-1.5-pro", 
         // "gemini-1.0-pro"
     ];
     
-    const prompt = `kamu adalah seorang asisten pribadi yang memberi kritik dan saran untuk konten yang diberikan oleh user. Berikut adalah konten yang perlu dikritik: ${text}`;
+    const prompt = text;
     
     for (const modelName of models) {
         try {
