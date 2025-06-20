@@ -4,6 +4,7 @@ const path = require('path');
 const { parseFileContent } = require('../utils/fileParser');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const Chat = require('../models/Chat');
+const Keyword = require('../models/Keyword');
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 
@@ -75,17 +76,30 @@ exports.askFile = async (req, res) => {
   try {
     const filePath = path.join(__dirname, '..', req.file.path);
     const fileText = await parseFileContent(filePath);
-    const result = await callGeminiAPI(fileText);
-    
+    const { keyword_id, text } = req.body;
+    let keywordDesc = '';
+    if (keyword_id) {
+      const keyword = await Keyword.getById(keyword_id);
+      if (keyword && keyword.prompt) {
+        keywordDesc = keyword.prompt;
+      }
+    }
+    let aiPrompt = `${fileText}\n`;
+    if (keywordDesc) {
+      aiPrompt += `\nInstruksi: ${keywordDesc}`;
+    }
+    if (text) {
+      aiPrompt += `\nPertanyaan: ${text}`;
+    }
+    const result = await callGeminiAPI(aiPrompt);
     // Save chat history to database
     if (result) {
       await Chat.create({
         user_message: `[File Upload: ${req.file.originalname}] ${fileText.substring(0, 100)}...`,
         ai_response: result,
-        keyword_id: null
+        keyword_id: keyword_id || null
       });
     }
-    
     fs.unlinkSync(filePath); // delete file after processing
     res.json({ response: result });
   } catch (err) {
