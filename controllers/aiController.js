@@ -53,7 +53,20 @@ exports.askText = async (req, res) => {
   if (!text) return res.status(400).json({ error: 'Text is required.' });
 
   try {
-    const result = await callGeminiAPI(text);
+    let contextPrompt = '';
+    if (session_id) {
+      // Ambil seluruh chat sebelumnya dalam sesi ini
+      const chats = await Chat.getBySessionId(session_id);
+      if (chats && chats.length > 0) {
+        // Gabungkan user_message dan ai_response secara berurutan
+        contextPrompt = chats.map(chat => `User: ${chat.user_message}\nAI: ${chat.ai_response}`).join('\n');
+        contextPrompt += '\n';
+      }
+    }
+    // Tambahkan prompt baru user di akhir
+    contextPrompt += `User: ${text}\nAI:`;
+
+    const result = await callGeminiAPI(contextPrompt);
     
     // Save chat history to database
     if (result) {
@@ -132,7 +145,19 @@ exports.askFile = async (req, res) => {
     if (text) {
       aiPrompt += `\nPertanyaan: ${text}`;
     }
-    const result = await callGeminiAPI(aiPrompt);
+
+    // Gabungkan konteks sesi (history chat) seperti pada askText
+    let contextPrompt = '';
+    if (session_id) {
+      const chats = await Chat.getBySessionId(session_id);
+      if (chats && chats.length > 0) {
+        contextPrompt = chats.map(chat => `User: ${chat.user_message}\nAI: ${chat.ai_response}`).join('\n');
+        contextPrompt += '\n';
+      }
+    }
+    contextPrompt += `User: ${aiPrompt}\nAI:`;
+
+    const result = await callGeminiAPI(contextPrompt);
     
     // Save chat history to database
     if (result) {
