@@ -4,6 +4,7 @@ const cors = require('cors');
 const aiRoutes = require('./routes/aiRoutes');
 const keywordRoutes = require('./routes/keywordRoutes');
 const chatRoutes = require('./routes/chatRoutes');
+const chatSessionRoutes = require('./routes/chatSessionRoutes');
 const path = require('path');
 
 dotenv.config();
@@ -37,6 +38,7 @@ app.get('/health', (req, res) => {
 app.use('/api/ask', aiRoutes);
 app.use('/api/keywords', keywordRoutes);
 app.use('/api/chats', chatRoutes);
+app.use('/api/sessions', chatSessionRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
