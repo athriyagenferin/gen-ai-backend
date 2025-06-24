@@ -1,226 +1,188 @@
-# GenAI Backend - Integrasi Frontend-Backend
+# Gemini Clone - GenAI Chat App
 
-Backend server untuk aplikasi GenAI yang terintegrasi dengan frontend React.
+Aplikasi kloning Google Gemini berbasis **React** (frontend) dan **Node.js/Express** (backend) dengan integrasi AI, multi-session chat, upload file, dan manajemen keyword.
 
-## 🚀 Fitur
+---
 
-- **AI Chat Integration** - Integrasi dengan Google Gemini AI
-- **Keyword Management** - CRUD operasi untuk keyword prompts
-- **Chat History** - Penyimpanan riwayat chat di database
-- **File Upload** - Upload dan proses file (PDF, DOCX, XLSX)
-- **Database Integration** - MySQL database dengan phpMyAdmin
-- **CORS Support** - Dukungan untuk frontend React
+## 🚀 Fitur Utama
 
-## 📋 Prerequisites
+- **Chat AI Multisession**: Simpan riwayat chat dalam beberapa sesi berbeda.
+- **Integrasi AI (Gemini/Google Generative AI)**: Jawaban AI cerdas, bisa diubah modelnya.
+- **Manajemen Keyword**: CRUD keyword prompt untuk customisasi instruksi AI.
+- **Upload & Analisis File**: Kirim file (PDF, DOCX, XLSX) untuk dianalisis AI.
+- **Database Relasional**: Semua data chat, sesi, dan keyword tersimpan di MySQL.
+- **Frontend Modern**: UI responsif dengan React, Vite, dan komponen modular.
+- **API Terbuka**: Endpoint RESTful untuk integrasi lebih lanjut.
+- **CORS & Keamanan**: Mendukung integrasi lintas domain.
 
-- Node.js (v16 atau lebih baru)
-- MySQL Server
-- phpMyAdmin (untuk manajemen database)
-- Google Gemini AI API Key
+---
 
-## 🛠️ Instalasi
+## 🏗️ Struktur Project
 
-1. **Clone repository dan install dependencies:**
+```
+genai/
+├── gemini-clone/         # Frontend (React)
+│   ├── src/
+│   │   ├── components/   # Komponen utama (Main, Sidebar, FileUpload, dsb)
+│   │   ├── services/     # API service (axios)
+│   │   ├── config/       # Konfigurasi (AI, dsb)
+│   │   ├── hooks/        # Custom React hooks
+│   │   ├── context/      # Context API
+│   │   └── App.jsx, main.jsx, index.css
+│   └── public/
+│
+└── genai-backend/        # Backend (Node.js/Express)
+    ├── app.js            # Entry point
+    ├── controllers/      # Logika utama (AI, chat, keyword, session)
+    ├── routes/           # API endpoints
+    ├── models/           # Model database
+    ├── database/         # schema.sql
+    ├── uploads/          # File upload sementara
+    └── utils/            # Utility (parser file, koneksi DB)
+```
+
+---
+
+## ⚙️ Instalasi & Menjalankan
+
+### 1. **Clone Repo & Install Dependencies**
+
 ```bash
+# Frontend
+cd gemini-clone
+npm install
+
+# Backend
+cd ../genai-backend
 npm install
 ```
 
-2. **Setup Database:**
-   - Buka phpMyAdmin
-   - Import file `database/schema.sql`
-   - Atau jalankan query SQL secara manual
+### 2. **Setup Database**
 
-3. **Konfigurasi Environment:**
-   - Copy `.env.example` ke `.env`
-   - Isi konfigurasi database dan API key
+- Pastikan MySQL aktif.
+- Import `genai-backend/database/schema.sql` via phpMyAdmin atau MySQL CLI.
 
-4. **Install dependencies tambahan:**
-```bash
-npm install cors mysql2
+### 3. **Konfigurasi Environment**
+
+Salin `.env.example` ke `.env` di folder backend, lalu isi:
 ```
-
-## 🔧 Konfigurasi
-
-### Environment Variables (.env)
-```env
 PORT=5000
 GEMINI_API_KEY=your_gemini_api_key_here
 DB_HOST=localhost
 DB_PORT=3306
 DB_USERNAME=root
-DB_PASSWORD=your_password_here
+DB_PASSWORD=your_password
 DB_DATABASE=genai_db
 ```
 
-### Database Schema
-- **keywords** - Tabel untuk menyimpan keyword prompts
-- **chats** - Tabel untuk menyimpan riwayat chat
+### 4. **Jalankan Aplikasi**
 
-## 🚀 Menjalankan Server
-
-### Development Mode
 ```bash
+# Backend
+cd genai-backend
+npm run dev
+
+# Frontend (tab baru)
+cd gemini-clone
 npm run dev
 ```
+Frontend: [http://localhost:5173](http://localhost:5173)  
+Backend: [http://localhost:5000](http://localhost:5000)
 
-### Production Mode
-```bash
-npm start
-```
+---
 
-Server akan berjalan di `http://localhost:5000`
+## 🧠 Cara Kerja Singkat
 
-## 📡 API Endpoints
+1. **User** mengetik pesan/chat di frontend.
+2. **Frontend** mengirim request ke backend (API).
+3. **Backend** memproses, menyimpan chat, dan memanggil AI (Gemini/Google Generative AI).
+4. **AI** membalas, backend mengirim balasan ke frontend.
+5. **Frontend** menampilkan balasan, riwayat chat tersimpan per sesi.
 
-### Health Check
-```
-GET /health
-```
+---
 
-### AI Chat
-```
-POST /api/ask/text
-POST /api/ask/file
-```
+## 📡 API Endpoints (Backend)
 
-### Keywords Management
-```
-GET    /api/keywords          # Get all keywords
-GET    /api/keywords/:id      # Get keyword by ID
-POST   /api/keywords          # Create new keyword
-PUT    /api/keywords/:id      # Update keyword
-DELETE /api/keywords/:id      # Delete keyword
-GET    /api/keywords/search   # Search keywords by title
-```
+- **AI Chat**
+  - `POST /api/ask/text` — Kirim chat teks ke AI
+  - `POST /api/ask/file` — Upload file untuk dianalisis AI
+- **Keyword**
+  - `GET /api/keywords` — List keyword
+  - `POST /api/keywords` — Tambah keyword
+  - `PUT /api/keywords/:id` — Edit keyword
+  - `DELETE /api/keywords/:id` — Hapus keyword
+- **Chat**
+  - `GET /api/chats` — Semua chat
+  - `GET /api/chats/:id` — Detail chat
+  - `DELETE /api/chats/:id` — Hapus chat
+- **Session**
+  - `GET /api/sessions` — Semua sesi chat
+  - `POST /api/sessions` — Buat sesi baru
+  - `PUT /api/sessions/:id` — Edit judul sesi
+  - `DELETE /api/sessions/:id` — Hapus sesi
 
-### Chat History
-```
-GET    /api/chats             # Get all chats
-GET    /api/chats/:id         # Get chat by ID
-POST   /api/chats             # Create new chat
-GET    /api/chats/keyword/:id # Get chats by keyword
-DELETE /api/chats/:id         # Delete chat
-```
+---
 
-## 🔄 Integrasi Frontend
+## 🗄️ Struktur Database
 
-### CORS Configuration
-Backend sudah dikonfigurasi untuk menerima request dari:
-- `http://localhost:5173` (Vite default)
-- `http://localhost:3000` (Create React App)
-- `http://127.0.0.1:5173`
+- **keywords**: id, title, prompt, created_at, updated_at
+- **chat_sessions**: id, title, first_message, created_at, updated_at, is_active
+- **chats**: id, session_id, user_message, ai_response, keyword_id, created_at
 
-### Contoh Request dari Frontend
+---
 
-#### Chat dengan AI
-```javascript
-// Text chat
-const response = await fetch('http://localhost:5000/api/ask/text', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-  },
-  body: JSON.stringify({
-    text: 'Hello AI',
-    keyword_id: 1 // optional
-  })
-});
+## 🖼️ Fitur Frontend
 
-// File upload
-const formData = new FormData();
-formData.append('file', fileInput.files[0]);
+- **Sidebar**: Navigasi sesi chat, tambah/hapus sesi.
+- **Main Chat**: Area chat dengan AI, dukungan markdown, highlight kode.
+- **File Upload**: Kirim file untuk dianalisis AI.
+- **KeywordPage**: Kelola prompt keyword.
+- **Testing**: Komponen untuk pengujian fitur.
 
-const response = await fetch('http://localhost:5000/api/ask/file', {
-  method: 'POST',
-  body: formData
-});
-```
+---
 
-#### Keyword Management
-```javascript
-// Get all keywords
-const keywords = await fetch('http://localhost:5000/api/keywords').then(r => r.json());
+## 🧩 Teknologi yang Digunakan
 
-// Create keyword
-const newKeyword = await fetch('http://localhost:5000/api/keywords', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({
-    title: 'New Keyword',
-    prompt: 'Prompt text',
-    category: 'general'
-  })
-}).then(r => r.json());
-```
+- **Frontend**: React, Vite, Axios, React Router, React Markdown, Lucide Icons
+- **Backend**: Node.js, Express, MySQL, Multer (upload), Google Generative AI SDK
+- **Database**: MySQL
+- **Lainnya**: ESLint, dotenv, cors, pdf-parse, mammoth, xlsx
 
-## 📁 Struktur Project
+---
 
-```
-genai-backend/
-├── app.js                 # Entry point
-├── package.json           # Dependencies
-├── routes/                # API routes
-│   ├── aiRoutes.js       # AI endpoints
-│   ├── keywordRoutes.js  # Keyword endpoints
-│   └── chatRoutes.js     # Chat endpoints
-├── controllers/           # Business logic
-│   ├── aiController.js   # AI processing
-│   ├── keywordController.js # Keyword CRUD
-│   └── chatController.js # Chat history
-├── models/               # Database models
-│   ├── Keyword.js       # Keyword model
-│   └── Chat.js          # Chat model
-├── utils/               # Utilities
-│   ├── fileParser.js    # File parsing
-│   └── db.js           # Database connection
-├── database/            # Database files
-│   └── schema.sql      # Database schema
-└── uploads/            # File upload directory
-```
+## 📝 FAQ
 
-## 🔍 Testing API
+**Q: Apakah ini pakai Gemini asli dari Google?**  
+A: Backend terintegrasi dengan Google Generative AI (Gemini) via API key. Bisa diganti model lain jika diinginkan.
 
-### Health Check
-```bash
-curl http://localhost:5000/health
-```
+**Q: Apakah data chat saya aman?**  
+A: Data hanya tersimpan di server lokal/developer, tidak dikirim ke pihak ketiga selain API AI.
 
-### Test AI Chat
-```bash
-curl -X POST http://localhost:5000/api/ask/text \
-  -H "Content-Type: application/json" \
-  -d '{"text": "Hello AI"}'
-```
+**Q: Bisa upload file apa saja?**  
+A: PDF, DOCX, XLSX. File dihapus otomatis setelah diproses.
 
-### Test Keywords
-```bash
-# Get all keywords
-curl http://localhost:5000/api/keywords
+**Q: Bagaimana mengatur panjang respon AI?**  
+A: Saat ini mengikuti default model Gemini. Untuk custom, edit parameter di backend (`aiController.js`).
 
-# Create keyword
-curl -X POST http://localhost:5000/api/keywords \
-  -H "Content-Type: application/json" \
-  -d '{"title": "Test", "prompt": "Test prompt", "category": "test"}'
-```
+---
 
-## 🐛 Troubleshooting
+## 🐞 Troubleshooting
 
-### Database Connection Error
-- Pastikan MySQL server berjalan
-- Periksa konfigurasi database di `.env`
-- Pastikan database `genai_db` sudah dibuat
+- **Database Error**: Pastikan MySQL aktif & konfigurasi benar.
+- **CORS Error**: Pastikan frontend & backend berjalan di port yang diizinkan.
+- **File Upload Error**: Pastikan folder `uploads/` ada & permission write.
 
-### CORS Error
-- Periksa origin frontend di konfigurasi CORS
-- Pastikan frontend berjalan di port yang benar
+---
 
-### File Upload Error
-- Pastikan folder `uploads/` ada dan memiliki permission write
-- Periksa ukuran file (default max 50MB)
+## 📬 Kontribusi
 
-## 📝 Notes
+Pull request & issue sangat diterima!  
+Silakan fork, buat branch, dan ajukan PR.
 
-- File yang diupload akan dihapus setelah diproses
-- Chat history otomatis tersimpan ke database
-- Keyword bisa dikategorikan untuk organisasi yang lebih baik
-- API responses menggunakan format standar dengan `success` dan `data/error` fields
+---
+
+## 📄 Lisensi
+
+MIT License
+
+---
